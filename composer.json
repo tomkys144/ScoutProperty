@@ -1,0 +1,22 @@
+{
+  "name": "scout_property/backend",
+  "minimum-stability": "stable",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "tomkys144",
+      "email": "tomkys144@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^7.4",
+    "skautis/skautis": "^2.2",
+    "vlucas/phpdotenv": "^5.2",
+    "ext-pdo": "*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app"
+    }
+  }
+}
