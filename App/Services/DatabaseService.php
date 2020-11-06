@@ -8,13 +8,16 @@ use PDOException;
 
 require dirname(__DIR__) . '/../bootstrap.php';
 
-
+/**
+ * Class DatabaseService
+ * @package App\Services
+ */
 class DatabaseService
 {
     /**
      * @var PDO|null
      */
-    private $databaseConnection = null;
+    private ?PDO $databaseConnection = null;
 
     /**
      * DatabaseService constructor.
@@ -26,7 +29,6 @@ class DatabaseService
         $dbname = $_ENV['DB_NAME'];
         $user = $_ENV['DB_USER'];
         $password = $_ENV['DB_PASSWORD'];
-
 
         try {
             $this->databaseConnection = new PDO(
@@ -42,8 +44,9 @@ class DatabaseService
     /**
      * @param string $name
      * @param array $data
+     * @return bool|null
      */
-    public function write(string $name, array $data)
+    public function write(string $name, array $data): ?bool
     {
         if (!$this->tableExists($name)) {
             $this->createTable($name, $data);
@@ -62,6 +65,7 @@ class DatabaseService
 
         try {
             $this->databaseConnection->exec($statement);
+            return true;
         } catch (PDOException $e) {
             exit($e->getMessage());
         }
@@ -71,34 +75,38 @@ class DatabaseService
      * @param string $name
      * @return bool
      */
-    private function tableExists(string $name)
+    private function tableExists(string $name): ?bool
     {
         if ($result = $this->databaseConnection->exec("SHOW TABLES LIKE '" . $name . "'")) {
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
      * @param string $name
      * @param array $columns
+     * @return bool|null
      */
-    private function createTable(string $name, array $columns)
+    private function createTable(string $name, array $columns): ?bool
     {
         $params = '(' . PHP_EOL . 'id INT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
         $no_columns = count($columns);
         $i = 0;
         foreach ($columns as $key => $value) {
-            if (++$i != $no_columns && $key != 'id') {
-                $params .= $key . ' ' . gettype($value) . ',' . PHP_EOL;
-            } elseif ($key != 'id') {
-                $params .= $key . ' ' . gettype($value) . PHP_EOL;
+            if ($key !== 'id') {
+                if (++$i !== $no_columns) {
+                    $params .= $key . ' ' . gettype($value) . ',' . PHP_EOL;
+                } else {
+                    $params .= $key . ' ' . gettype($value) . PHP_EOL;
+                }
             }
         }
         $statement = "CREATE TABLE IF NOT EXISTS $name $params)";
         try {
             $this->databaseConnection->exec($statement);
+            return true;
         } catch (PDOException $e) {
             exit($e->getMessage());
         }
@@ -110,11 +118,11 @@ class DatabaseService
      * @param string|null $condition
      * @return array
      */
-    public function getData(string $table, array $columns = ['*'], string $condition = null)
+    public function getData(string $table, array $columns = ['*'], string $condition = null): ?array
     {
         $statement = "SELECT ";
         foreach ($columns as $column) {
-            $statement .= "$column" . ", ";
+            $statement .= $column . ", ";
         }
         $statement = substr_replace($statement, ' ', -2);
         $statement .= "FROM $table";
