@@ -3,7 +3,6 @@
 
 namespace App\Services\Skautis;
 
-use Exception;
 use Skautis\HelperTrait;
 use Skautis\Skautis;
 
@@ -28,11 +27,7 @@ class SkautisService
         $appid = $_ENV['SKAUTIS_APPID'];
         $test = $_ENV['SKAUTIS_TEST'];
 
-        try {
-            $this->skautis = Skautis::getInstance($appid, $test);
-        } catch (Exception $e) {
-            exit($e->getMessage());
-        }
+        $this->skautis = Skautis::getInstance($appid, $test);
     }
 
     /**
@@ -50,12 +45,8 @@ class SkautisService
      */
     public function confirmLogin(array $data): ?bool
     {
-        try {
-            $this->skautis->setLoginData($data);
-            return true;
-        } catch (Exception $e) {
-            exit($e->getMessage());
-        }
+        $this->skautis->setLoginData($data);
+        return true;
     }
 
 

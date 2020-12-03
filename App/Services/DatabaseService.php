@@ -44,9 +44,9 @@ class DatabaseService
     /**
      * @param string $name
      * @param array $data
-     * @return bool|null
+     * @return array
      */
-    public function write(string $name, array $data): ?bool
+    public function write(string $name, array $data): array
     {
         if (!$this->tableExists($name)) {
             $this->createTable($name, $data);
@@ -65,9 +65,9 @@ class DatabaseService
 
         try {
             $this->databaseConnection->exec($statement);
-            return true;
+            return array('SUCCESS' => true);
         } catch (PDOException $e) {
-            exit($e->getMessage());
+            return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
     }
 
@@ -87,9 +87,9 @@ class DatabaseService
     /**
      * @param string $name
      * @param array $columns
-     * @return bool|null
+     * @return bool[]
      */
-    private function createTable(string $name, array $columns): ?bool
+    private function createTable(string $name, array $columns): array
     {
         $params = '(' . PHP_EOL . 'id INT NOT NULL AUTO_INCREMENT,' . PHP_EOL;
         $no_columns = count($columns);
@@ -106,9 +106,9 @@ class DatabaseService
         $statement = "CREATE TABLE IF NOT EXISTS $name $params)";
         try {
             $this->databaseConnection->exec($statement);
-            return true;
+            return array('SUCCESS' => true);
         } catch (PDOException $e) {
-            exit($e->getMessage());
+            return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
     }
 
@@ -133,7 +133,7 @@ class DatabaseService
             $response = $this->databaseConnection->query($statement);
             return $response->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            exit($e->getMessage());
+            return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
     }
 }

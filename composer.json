@@ -13,7 +13,8 @@
     "skautis/skautis": "^2.2",
     "vlucas/phpdotenv": "^5.2",
     "ext-pdo": "*",
-    "slim/slim": "^4.5"
+    "slim/slim": "^4.5",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": {
