@@ -49,5 +49,12 @@ class SkautisService
         return true;
     }
 
+    /**
+     * @return string
+     */
+    public function getLogoutUrl(): string
+    {
+        return $this->skautis->getLogoutUrl();
+    }
 
 }

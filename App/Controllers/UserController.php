@@ -7,6 +7,8 @@ use App\Services\Skautis\SkautisPersonService;
 use App\Services\Skautis\SkautisService;
 use Exception;
 
+require dirname(__DIR__) . '/../bootstrap.php';
+
 /**
  * Class UserController
  * @package App\Controllers
@@ -56,9 +58,18 @@ class UserController
         }
     }
 
-    protected function logout()
+    /**
+     * @return array
+     */
+    protected function logout(): array
     {
-        //TODO: Create logout function
+        try {
+            $skautisService = new SkautisService();
+            $url = $skautisService->getLogoutUrl();
+            return array('CODE' => 200, 'DATA' => [$url]);
+        } catch (Exception $e) {
+            return array('CODE' => $e->getCode(), 'DATA' => [$e->getMessage()]);
+        }
     }
 
     /**
