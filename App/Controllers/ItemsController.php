@@ -109,4 +109,21 @@ class ItemsController
 
         return array('CODE' => 200, 'DATA' => $result);
     }
+
+    /**
+     * @param int $id
+     * @param string $type
+     * @return array
+     */
+    protected function removeItem(int $id, string $type = 'general'): array
+    {
+        $DatabaseService = new DatabaseService();
+        $result = $DatabaseService->deleteData($type, $id);
+
+        if (!$result['SUCCESS']) {
+            return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+        }
+
+        return array('CODE' => 200, 'DATA' => []);
+    }
 }

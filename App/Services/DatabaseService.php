@@ -136,4 +136,21 @@ class DatabaseService
             return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
     }
+
+    /**
+     * @param string $table
+     * @param int $id
+     * @return array
+     */
+    public function deleteData(string $table, int $id): array
+    {
+        $statement = "DELETE FROM $table WHERE id=$id";
+
+        try {
+            $this->databaseConnection->exec($statement);
+            return array('SUCCESS' => true);
+        } catch (PDOException $e) {
+            return array('SUCCESS' => false, 'ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
+        }
+    }
 }
