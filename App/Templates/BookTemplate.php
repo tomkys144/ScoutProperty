@@ -3,7 +3,10 @@
 
 namespace App\Templates;
 
-
+/**
+ * Class BookTemplate
+ * @package App\Templates
+ */
 class BookTemplate extends Template
 {
     protected array $requiredProperties = array(
