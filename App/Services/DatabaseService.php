@@ -67,7 +67,7 @@ class DatabaseService
             $this->databaseConnection->exec($statement);
             return array('SUCCESS' => true);
         } catch (PDOException $e) {
-            return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
+            return array('SUCCESS' => false, 'ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
     }
 
