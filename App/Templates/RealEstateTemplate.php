@@ -3,7 +3,10 @@
 
 namespace App\Templates;
 
-
+/**
+ * Class RealEstateTemplate
+ * @package App\Templates
+ */
 class RealEstateTemplate extends Template
 {
     protected array $requiredProperties = array(

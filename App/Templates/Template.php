@@ -3,7 +3,10 @@
 
 namespace App\Templates;
 
-
+/**
+ * Class Template
+ * @package App\Templates
+ */
 class Template
 {
     protected array $requiredProperties;
@@ -11,7 +14,7 @@ class Template
 
     /**
      * @param array $items
-     * @return array|bool[]
+     * @return array
      */
     public function checkItems(array $items): array
     {
@@ -45,5 +48,13 @@ class Template
         }
         return array('valid' => true);
 
+    }
+
+    /**
+     * @return array
+     */
+    public function getItems(): array
+    {
+        return array('required' => $this->requiredProperties, 'optional' => $this->optionalProperties);
     }
 }
