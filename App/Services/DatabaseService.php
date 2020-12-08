@@ -3,8 +3,7 @@
 
 namespace App\Services;
 
-use PDO;
-use PDOException;
+use mysqli;
 
 require dirname(__DIR__) . '/../bootstrap.php';
 
@@ -14,10 +13,7 @@ require dirname(__DIR__) . '/../bootstrap.php';
  */
 class DatabaseService
 {
-    /**
-     * @var PDO|null
-     */
-    private ?PDO $databaseConnection = null;
+    private ?mysqli $databaseConnection = null;
 
     /**
      * DatabaseService constructor.
@@ -30,15 +26,16 @@ class DatabaseService
         $user = $_ENV['DB_USER'];
         $password = $_ENV['DB_PASSWORD'];
 
-        try {
-            $this->databaseConnection = new PDO(
-                "mysql:host=$host;port=$port;charset=utf8mb4;dbname=$dbname",
-                $user,
-                $password
-            );
-        } catch (PDOException $e) {
-            exit($e->getMessage());
+
+        $this->databaseConnection = new mysqli($host, $user, $password, $dbname, $port);
+        if ($this->databaseConnection->connect_error) {
+            exit($this->databaseConnection->connect_error);
         }
+    }
+
+    public function __destruct()
+    {
+        $this->databaseConnection->close();
     }
 
     /**
@@ -49,7 +46,10 @@ class DatabaseService
     public function write(string $name, array $data): array
     {
         if (!$this->tableExists($name)) {
-            $this->createTable($name, $data);
+            $result = $this->createTable($name, $data);
+            if (!$result['SUCCESS']) {
+                return $result;
+            }
         }
         $values = '(';
         $keys = '(';
@@ -63,12 +63,11 @@ class DatabaseService
 
         $statement = "INSERT INTO $name $keys" . PHP_EOL . "VALUES $values;";
 
-        try {
-            $this->databaseConnection->exec($statement);
+        if ($this->databaseConnection->query($statement) === TRUE) {
             return array('SUCCESS' => true);
-        } catch (PDOException $e) {
-            return array('SUCCESS' => false, 'ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
+
+        return array('SUCCESS' => false, 'ERROR_CODE' => $this->databaseConnection->errno, 'ERROR_MESSAGE' => $this->databaseConnection->error);
     }
 
     /**
@@ -77,11 +76,8 @@ class DatabaseService
      */
     private function tableExists(string $name): ?bool
     {
-        if ($result = $this->databaseConnection->exec("SHOW TABLES LIKE '" . $name . "'")) {
-            return true;
-        }
-
-        return false;
+        $result = $this->databaseConnection->query("SHOW TABLES LIKE '" . $name . "'");
+        return $result->num_rows > 0;
     }
 
     /**
@@ -104,12 +100,12 @@ class DatabaseService
             }
         }
         $statement = "CREATE TABLE IF NOT EXISTS $name $params)";
-        try {
-            $this->databaseConnection->exec($statement);
+
+        if ($this->databaseConnection->query($statement) === TRUE) {
             return array('SUCCESS' => true);
-        } catch (PDOException $e) {
-            return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
+
+        return array('SUCCESS' => false, 'ERROR_CODE' => $this->databaseConnection->errno, 'ERROR_MESSAGE' => $this->databaseConnection->error);
     }
 
     /**
@@ -129,12 +125,21 @@ class DatabaseService
         if (isset($condition)) {
             $statement .= PHP_EOL . "WHERE $condition;";
         }
-        try {
-            $response = $this->databaseConnection->query($statement);
-            return $response->fetchAll(PDO::FETCH_ASSOC);
-        } catch (PDOException $e) {
-            return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
+
+        $answer = $this->databaseConnection->query($statement);
+
+        if ($this->databaseConnection->errno) {
+            return array('SUCCESS' => false, 'ERROR_CODE' => $this->databaseConnection->errno, 'ERROR_MESSAGE' => $this->databaseConnection->error);
         }
+
+        $result = array();
+        while ($row = $answer->fetch_assoc()) {
+            $result[] = $row;
+        }
+
+        $answer->free();
+
+        return array('SUCCESS' => true, 'DATA' => $result);
     }
 
     /**
@@ -146,11 +151,10 @@ class DatabaseService
     {
         $statement = "DELETE FROM $table WHERE id=$id";
 
-        try {
-            $this->databaseConnection->exec($statement);
+        if ($this->databaseConnection->query($statement) === TRUE) {
             return array('SUCCESS' => true);
-        } catch (PDOException $e) {
-            return array('SUCCESS' => false, 'ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
         }
+
+        return array('SUCCESS' => false, 'ERROR_CODE' => $this->databaseConnection->errno, 'ERROR_MESSAGE' => $this->databaseConnection->error);
     }
 }

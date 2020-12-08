@@ -12,9 +12,12 @@
     "php": "^7.4",
     "skautis/skautis": "^2.2",
     "vlucas/phpdotenv": "^5.2",
-    "ext-pdo": "*",
     "slim/slim": "^4.5",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-mysqli": "*"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-master"
   },
   "autoload": {
     "psr-4": {
