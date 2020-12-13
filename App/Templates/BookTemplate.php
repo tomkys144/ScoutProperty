@@ -11,7 +11,7 @@ class BookTemplate extends Template
 {
     protected array $requiredProperties = array(
         'name' => 'string',
-        'location' => 'string'
+        'location' => 'array'
     );
 
     protected array $optionalProperties = array(
