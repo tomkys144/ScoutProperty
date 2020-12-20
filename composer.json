@@ -10,11 +10,12 @@
   ],
   "require": {
     "php": "^7.4",
+    "ext-json": "*",
+    "ext-mysqli": "*",
+    "ext-soap": "*",
     "skautis/skautis": "^2.2",
     "vlucas/phpdotenv": "^5.2",
-    "slim/slim": "^4.5",
-    "ext-json": "*",
-    "ext-mysqli": "*"
+    "slim/slim": "^4.5"
   },
   "require-dev": {
     "roave/security-advisories": "dev-master"
