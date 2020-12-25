@@ -283,7 +283,7 @@ class SkautisPropertyService extends SkautisService
      * @param array $IDs
      * @param string $DeletionDate
      * @param string|null $DeletionNote
-     * @return array|bool[]
+     * @return array
      */
     public function deleteItem(array $IDs, string $DeletionDate, string $DeletionNote = null): array
     {

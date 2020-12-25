@@ -4,6 +4,7 @@
 namespace App\Controllers;
 
 use App\Services\DatabaseService;
+use App\Services\Skautis\SkautisPropertyService;
 use App\Templates\BookTemplate;
 use App\Templates\GeneralItemTemplate;
 use App\Templates\RealEstateTemplate;
@@ -66,6 +67,10 @@ class ItemsController
         if (!$result['SUCCESS']) {
             return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
         }
+
+        $PropertyService = new SkautisPropertyService();
+
+        $result = $PropertyService->createItem();
 
         return array('CODE' => 200, 'DATA' => []);
     }
