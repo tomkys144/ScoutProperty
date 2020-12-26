@@ -5,9 +5,6 @@ namespace App\Controllers;
 
 use App\Services\DatabaseService;
 use App\Services\Skautis\SkautisPropertyService;
-use App\Templates\BookTemplate;
-use App\Templates\GeneralItemTemplate;
-use App\Templates\RealEstateTemplate;
 
 /**
  * Class ItemsController
@@ -36,67 +33,38 @@ class ItemsController
      */
     protected function createItem(array $properties, string $type = 'general'): array
     {
-        if ($type === 'general') {
-            $template = new GeneralItemTemplate();
-            $validation = $template->checkItems($properties);
-            if (!$validation['valid']) {
-                return array('CODE' => 400, 'DATA' => $validation['items']);
-            }
-
-        } elseif ($type === 'book') {
-            $template = new BookTemplate();
-            $validation = $template->checkItems($properties);
-            if (!$validation['valid']) {
-                return array('CODE' => 400, 'DATA' => $validation['items']);
-            }
-
-        } elseif ($type === 'real_estate') {
-            $template = new RealEstateTemplate();
-            $validation = $template->checkItems($properties);
-            if (!$validation['valid']) {
-                return array('CODE' => 400, 'DATA' => $validation['items']);
-            }
-
-        } else {
-            return array('CODE' => 400, 'DATA' => ['Type does not exist']);
-        }
-
         $DatabaseService = new DatabaseService();
-        $result = $DatabaseService->write($type, $properties);
 
-        if (!$result['SUCCESS']) {
-            return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+
+        $PropertyService = new SkautisPropertyService();
+        if ($properties["createWarehouse"]) {
+            $result = $DatabaseService->write($type, array_merge($properties, array('WarehouseExists' => true)));
+            if (!$result['SUCCESS']) {
+                return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+            }
+            $result = call_user_func_array(array($PropertyService, "createWarehouse"), $properties['warehouseInfo']);
+            if (array_key_exists('ERROR_CODE', $result)) {
+                return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+            }
+            unset($properties["warehouseInfo"], $properties["createWarehouse"]);
+            $properties['WarehouseID'] = $result["ID"];
+        } elseif ($properties["createWarehouse"] === false) {
+            $result = $DatabaseService->write($type, array_merge($properties, array('WarehouseExists' => false)));
+            if (!$result['SUCCESS']) {
+                return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+            }
+        } else {
+            $result = $DatabaseService->write($type, $properties);
+            if (!$result['SUCCESS']) {
+                return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+            }
         }
 
         $PropertyService = new SkautisPropertyService();
 
         $result = $PropertyService->createItem();
-
+        call_user_func_array(array($PropertyService, "createItem"), $properties);
         return array('CODE' => 200, 'DATA' => []);
-    }
-
-    /**
-     * @param string $type
-     * @return array
-     */
-    protected function getPossibleProperties(string $type = 'general'): array
-    {
-        if ($type === 'general') {
-            $template = new GeneralItemTemplate();
-            return array('CODE' => 200, 'DATA' => $template->getItems());
-        }
-
-        if ($type === 'book') {
-            $template = new BookTemplate();
-            return array('CODE' => 200, 'DATA' => $template->getItems());
-        }
-
-        if ($type === 'real_estate') {
-            $template = new RealEstateTemplate();
-            return array('CODE' => 200, 'DATA' => $template->getItems());
-        }
-
-        return array('CODE' => 400, 'DATA' => ['Type does not exist']);
     }
 
     /**
@@ -117,13 +85,36 @@ class ItemsController
 
     /**
      * @param int $id
+     * @param string $DeletionDate
      * @param string $type
+     * @param int|null $WarehouseID
+     * @param string|null $DeletionNote
      * @return array
      */
-    protected function removeItem(int $id, string $type = 'general'): array
+    protected function removeItem(int $id, string $DeletionDate, string $type = 'general', int $WarehouseID = null, string $DeletionNote = null): array
     {
         $DatabaseService = new DatabaseService();
+        if ($type === 'nemovitost') {
+            $isWarehouse = $DatabaseService->getData('nemovitost', ['WarehouseExists'], "ID = $id");
+        }
         $result = $DatabaseService->deleteData($type, $id);
+
+        if (!$result['SUCCESS']) {
+            return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+        }
+
+        $PropertyService = new SkautisPropertyService();
+        if (isset($isWarehouse) && $isWarehouse) {
+            $result = $PropertyService->deleteWarehouse($WarehouseID);
+            if (!$result['SUCCESS']) {
+                return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
+            }
+        }
+        if (isset($DeletionNote)) {
+            $result = $PropertyService->deleteItem((array)$id, $DeletionDate, $DeletionNote);
+        } else {
+            $result = $PropertyService->deleteItem((array)$id, $DeletionDate);
+        }
 
         if (!$result['SUCCESS']) {
             return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
