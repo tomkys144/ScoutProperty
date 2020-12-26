@@ -12,12 +12,12 @@ use Exception;
 class SessionService
 {
     /**
-     * @param false $sessionID
+     * @param string|null $sessionID
      * @return array
      */
-    public function startSession($sessionID = false): array
+    public function startSession(string $sessionID = null): array
     {
-        if ($sessionID) {
+        if (isset($sessionID)) {
             session_id($sessionID);
         }
         try {
@@ -35,7 +35,7 @@ class SessionService
     {
         if ((session_status() === PHP_SESSION_ACTIVE)) {
             try {
-                return array(200, session_id());
+                return array(session_id());
             } catch (Exception $e) {
                 return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
             }
