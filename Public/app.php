@@ -11,6 +11,17 @@ require_once __DIR__ . '/../bootstrap.php';
 
 $app = AppFactory::create();
 
+$app->addRoutingMiddleware();
+
+$app->addErrorMiddleware(true, true, false);
+
+$app->get('/', function (Request $request, Response $response, $parameters) {
+    $response->getBody()->write('Works');
+
+    return $response
+        ->withStatus(200);
+});
+
 $app->post('/items/{method}', function (Request $request, Response $response) {
     $method = $request->getAttribute('method');
     $sessionID = $request->getAttribute('sessionID');
@@ -23,13 +34,23 @@ $app->post('/items/{method}', function (Request $request, Response $response) {
         $SessionController->startSession($sessionID);
     }
 
-    $result = call_user_func_array(array($ItemsController, $method), $request->getAttribute('Args'));
+    $params = json_decode($request->getAttribute('Args'));
+
+    if (!is_array($params) && $params !== null) {
+        $params = array($params);
+    } elseif ($params === null) {
+        $params = array();
+    }
+
+    $result = call_user_func_array(array($ItemsController, $method), $params);
 
     $data = json_encode($result['DATA']);
 
     $response->getBody()->write($data);
 
-    return $response->withStatus($result['CODE']);
+    return $response
+        ->withHeader('Content-Type', 'application/json')
+        ->withStatus(201);
 });
 
 $app->post('/user/{method}', function (Request $request, Response $response) {
@@ -44,11 +65,23 @@ $app->post('/user/{method}', function (Request $request, Response $response) {
         $SessionController->startSession($sessionID);
     }
 
-    $result = call_user_func_array(array($UserController, $method), json_decode($request->getAttribute('Args')));
+    $params = json_decode($request->getAttribute('Args'));
+
+    if (!is_array($params) && $params !== null) {
+        $params = array($params);
+    } elseif ($params === null) {
+        $params = array();
+    }
+
+    $result = call_user_func_array(array($UserController, $method), $params);
 
     $data = json_encode($result['DATA']);
 
     $response->getBody()->write($data);
 
-    return $response->withStatus($result['CODE']);
+    return $response
+        ->withHeader('Content-Type', 'application/json')
+        ->withStatus(201);
 });
+
+$app->run();
