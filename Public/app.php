@@ -28,23 +28,13 @@ $app->post('/items/{method}', function (Request $request, Response $response) {
         $SessionController->startSession($sessionID);
     }
 
-    $params = json_decode($request->getBody(), true);
-
-    if (!is_array($params) && $params !== null) {
-        $params = array($params);
-    } elseif ($params === null) {
-        $params = array();
-    }
-
-    $result = call_user_func_array(array($ItemsController, $method), $params['Args']);
+    $result = call_user_func_array(array($ItemsController, $method), $request->getAttribute('Args'));
 
     $data = json_encode($result['DATA']);
 
     $response->getBody()->write($data);
 
-    return $response
-        ->withHeader('Content-Type', 'application/json')
-        ->withStatus(201);
+    return $response->withStatus($result['CODE']);
 });
 
 $app->post('/user/{method}', function (Request $request, Response $response) {
