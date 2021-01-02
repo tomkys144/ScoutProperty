@@ -40,7 +40,7 @@ class SessionService
                 return array('ERROR_CODE' => $e->getCode(), 'ERROR_MESSAGE' => $e->getMessage());
             }
         } else {
-            return array(400);
+            return array('ERROR_CODE' => 400);
         }
     }
 
