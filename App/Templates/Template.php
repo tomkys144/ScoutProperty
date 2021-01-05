@@ -21,14 +21,14 @@ class Template
         $invalidItems = array();
         $missingItems = array();
         foreach (array_keys($items) as $key) {
-            if (array_key_exists($key, $this->requiredProperties)) {
+            if (isset($this->requiredProperties[$key])) {
                 if (gettype($items[$key]) !== $this->requiredProperties[$key]) {
                     $invalidItems[$key] = 'Invalid property type';
                 }
                 continue;
             }
 
-            if (array_key_exists($key, $this->optionalProperties)) {
+            if (isset($key, $this->optionalProperties)) {
                 if (gettype($items[$key]) !== $this->optionalProperties[$key]) {
                     $invalidItems[$key] = 'Invalid property type';
                 }
@@ -38,7 +38,7 @@ class Template
             $invalidItems[$key] = 'Invalid property name';
         }
         foreach (array_keys($this->requiredProperties) as $key) {
-            if (!array_key_exists($key, $items)) {
+            if (!isset($items[$key])) {
                 $missingItems[$key] = 'Item is missing';
             }
         }
