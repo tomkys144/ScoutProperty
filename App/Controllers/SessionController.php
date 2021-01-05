@@ -33,7 +33,7 @@ class SessionController
     public function getSessionID(): array
     {
         $data = $this->session->getSessionID();
-        if (!array_key_exists('ERROR_CODE', $data)) {
+        if (!isset($data['ERROR_CODE'])) {
             return array('CODE' => 200, 'DATA' => $data);
         }
 

@@ -43,7 +43,7 @@ class ItemsController
                 return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
             }
             $result = call_user_func_array(array($PropertyService, "createWarehouse"), $properties['warehouseInfo']);
-            if (array_key_exists('ERROR_CODE', $result)) {
+            if (isset($result['ERROR_CODE'])) {
                 return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
             }
             unset($properties["warehouseInfo"], $properties["createWarehouse"]);
@@ -76,7 +76,7 @@ class ItemsController
         $DatabaseService = new DatabaseService();
         $result = $DatabaseService->getData($type);
 
-        if (array_key_exists('ERROR_CODE', $result)) {
+        if (isset($result['ERROR_CODE'])) {
             return array('CODE' => $result['ERROR_CODE'], 'DATA' => [$result['ERROR_MESSAGE']]);
         }
 

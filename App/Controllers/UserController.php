@@ -80,9 +80,9 @@ class UserController
         try {
             $personService = new SkautisPersonService();
             $user = $personService->getUserDetail();
-            if (!array_key_exists('ERROR_CODE', $user)) {
+            if (!isset($user['ERROR_CODE'])) {
                 $data = $personService->getPersonRoles($user);
-                if (!array_key_exists('ERROR_CODE', $data)) {
+                if (!isset($data['ERROR_CODE'])) {
                     return array('CODE' => 200, 'DATA' => $data);
                 }
 
@@ -105,7 +105,7 @@ class UserController
         try {
             $personService = new SkautisPersonService();
             $data = $personService->switchPersonRoles($RoleID);
-            if (!array_key_exists('ERROR_CODE', $data)) {
+            if (!isset($data['ERROR_CODE'])) {
                 return array('CODE' => 200, 'DATA' => $data);
             }
 

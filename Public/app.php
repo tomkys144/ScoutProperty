@@ -23,10 +23,10 @@ $app->post('/items/{method}', function (Request $request, Response $response) {
 
     $params = json_decode($request->getBody(), true);
 
-    if (!is_array($params) && $params !== null) {
-        $params = array($params);
-    } elseif ($params === null) {
-        $params = array();
+    if (!is_array($params['Args']) && $params['Args'] !== null) {
+        $params['Args'] = array($params['Args']);
+    } elseif ($params['Args'] === null) {
+        $params['Args'] = array();
     }
 
     if (!isset($params['Token'])) {
@@ -65,10 +65,10 @@ $app->post('/user/{method}', function (Request $request, Response $response) {
 
     $params = json_decode($request->getBody(), true);
 
-    if (!is_array($params) && $params !== null) {
-        $params = array($params);
-    } elseif ($params === null) {
-        $params = array();
+    if (gettype($params['Args']) !== 'array' && isset($params['Args'])) {
+        $params['Args'] = array($params['Args']);
+    } elseif (!isset($params['Args'])) {
+        $params['Args'] = array();
     }
 
     if (!isset($params['Token'])) {
